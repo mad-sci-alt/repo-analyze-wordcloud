@@ -5,7 +5,7 @@ export interface AnalyzeResponse {
 }
 
 export interface ProgressInfo {
-  stage: "cloning" | "tokenizing" | "generating";
+  stage: "cloning" | "tokenizing" | "generating" | "analyzing_history";
   message: string;
 }
 
@@ -29,12 +29,36 @@ export interface Metadata {
   total_tokens: number;
 }
 
+export interface DirectoryStat {
+  dir: string;
+  token_count: number;
+  file_count: number;
+  top_words: FrequencyStat[];
+}
+
+export interface FileStat {
+  path: string;
+  token_count: number;
+  extension: string;
+}
+
+export interface CommitSnapshot {
+  date: string;
+  total_lines: number;
+  files_changed: number;
+  languages: Record<string, number>;
+}
+
 export interface ResultResponse {
   job_id: string;
   status: string;
   word_cloud_image: string;
   frequency_stats: FrequencyStat[];
   metadata: Metadata;
+  directory_stats: DirectoryStat[];
+  file_stats: FileStat[];
+  language_stats: Record<string, FrequencyStat[]>;
+  commit_history: CommitSnapshot[];
 }
 
 export type AnalyzePhase =
@@ -51,3 +75,5 @@ export interface AnalyzeState {
   result?: ResultResponse;
   message?: string;
 }
+
+export type TopNOption = 10 | 20 | 25 | 50 | 100;

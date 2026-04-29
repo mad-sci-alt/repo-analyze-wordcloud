@@ -5,17 +5,17 @@ from git.exc import GitCommandError
 from ..config import ALLOWED_EXTENSIONS, MAX_FILE_SIZE, SKIP_DIRS
 
 
-def clone_repository(url: str, branch: str, dest_dir: Path) -> Path:
-    """Clone `url` at `branch` into `dest_dir`. Returns path to repo root."""
+def clone_repository(url: str, branch: str, dest_dir: Path, depth: int | None = None) -> tuple[Path, Repo]:
+    """Clone `url` at `branch` into `dest_dir`. Returns (repo_root, Repo object)."""
     try:
-        repo = Repo.clone_from(
-            url,
-            dest_dir,
-            branch=branch,
-            depth=1,
-            env={"GIT_TERMINAL_PROMPT": "0"},
-        )
-        return Path(repo.working_tree_dir)
+        kwargs: dict = {
+            "branch": branch,
+            "env": {"GIT_TERMINAL_PROMPT": "0"},
+        }
+        if depth is not None:
+            kwargs["depth"] = depth
+        repo = Repo.clone_from(url, dest_dir, **kwargs)
+        return Path(repo.working_tree_dir), repo
     except GitCommandError as e:
         raise ValueError(f"Git clone failed: {e.stderr}")
 
@@ -24,6 +24,7 @@ def extract_code_files(repo_root: Path):
     """
     Walk repo_root, yield (file_path, content) for allowed file types.
     Skips binary/too-large files and SKIP_DIRS directories.
+    file_path is relative to repo_root for consistent path display.
     """
     for path in _walk_files(repo_root):
         if path.is_file() and path.suffix.lower() in ALLOWED_EXTENSIONS:
@@ -31,7 +32,9 @@ def extract_code_files(repo_root: Path):
                 continue
             try:
                 content = path.read_text(encoding="utf-8", errors="ignore")
-                yield path, content
+                # Return relative path for consistent display
+                rel = path.relative_to(repo_root)
+                yield rel, content
             except OSError:
                 continue
 

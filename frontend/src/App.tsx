@@ -2,7 +2,12 @@ import { RepoInputForm } from "./components/RepoInputForm";
 import { StatusIndicator } from "./components/StatusIndicator";
 import { WordCloudDisplay } from "./components/WordCloudDisplay";
 import { FrequencyChart } from "./components/FrequencyChart";
+import { DirectoryBreakdown } from "./components/DirectoryBreakdown";
+import { FileStatsTable } from "./components/FileStatsTable";
+import { LanguageBreakdown } from "./components/LanguageBreakdown";
+import { CommitHistoryChart } from "./components/CommitHistoryChart";
 import { useAnalyze } from "./hooks/useAnalyze";
+import { downloadCSV } from "./api/client";
 
 function App() {
   const { state, submit, reset } = useAnalyze();
@@ -70,14 +75,22 @@ function App() {
                   <p className="text-sm font-medium text-gray-900">{state.result.metadata.branch}</p>
                 </div>
                 <div className="border-l border-gray-200 pl-4">
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">Files Processed</span>
+                  <span className="text-xs text-gray-500 uppercase tracking-wider">Files</span>
                   <p className="text-sm font-medium text-gray-900">{state.result.metadata.files_processed}</p>
                 </div>
                 <div className="border-l border-gray-200 pl-4">
                   <span className="text-xs text-gray-500 uppercase tracking-wider">Total Tokens</span>
                   <p className="text-sm font-medium text-gray-900">{state.result.metadata.total_tokens.toLocaleString()}</p>
                 </div>
-                <div className="ml-auto">
+                <div className="ml-auto flex gap-3">
+                  {state.jobId && (
+                    <button
+                      onClick={() => downloadCSV(state.jobId!)}
+                      className="text-sm text-blue-600 hover:text-blue-800 border border-blue-300 hover:border-blue-500 px-3 py-1 rounded-lg transition cursor-pointer"
+                    >
+                      Download CSV
+                    </button>
+                  )}
                   <button
                     onClick={reset}
                     className="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer"
@@ -91,7 +104,7 @@ function App() {
             {/* Word Cloud */}
             <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">Word Cloud</h2>
-              <p className="text-gray-500 text-xs mb-4">Top 20 most frequent non-stopword tokens</p>
+              <p className="text-gray-500 text-xs mb-4">Most frequent non-stopword tokens</p>
               <WordCloudDisplay imageDataUrl={state.result.word_cloud_image} />
             </section>
 
@@ -99,6 +112,34 @@ function App() {
             <section className="mb-6">
               <FrequencyChart stats={state.result.frequency_stats} />
             </section>
+
+            {/* Language Breakdown */}
+            {Object.keys(state.result.language_stats).length > 0 && (
+              <section className="mb-6">
+                <LanguageBreakdown stats={state.result.language_stats} />
+              </section>
+            )}
+
+            {/* Commit History */}
+            {state.result.commit_history.length > 0 && (
+              <section className="mb-6">
+                <CommitHistoryChart history={state.result.commit_history} />
+              </section>
+            )}
+
+            {/* Directory Breakdown */}
+            {state.result.directory_stats.length > 0 && (
+              <section className="mb-6">
+                <DirectoryBreakdown stats={state.result.directory_stats} />
+              </section>
+            )}
+
+            {/* File Stats Table */}
+            {state.result.file_stats.length > 0 && (
+              <section className="mb-6">
+                <FileStatsTable stats={state.result.file_stats} />
+              </section>
+            )}
 
             {/* Stats Table */}
             <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

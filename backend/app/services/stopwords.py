@@ -51,10 +51,11 @@ _CODE_STOP: set[str] = {
 ALL_STOP = _ENGLISH_STOP | _CODE_STOP
 
 
-def filter_stopwords(counter: Counter[str]) -> Counter[str]:
+def filter_stopwords(counter: Counter[str], extra: set[str] | None = None) -> Counter[str]:
     """Remove all stopwords from a word-frequency counter."""
+    stop = ALL_STOP | (extra or set())
     return Counter({
         word: count
         for word, count in counter.items()
-        if word not in ALL_STOP and len(word) >= 2
+        if word not in stop and len(word) >= 2
     })

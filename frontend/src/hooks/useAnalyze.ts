@@ -5,10 +5,17 @@ import type { AnalyzeState } from "../types";
 export function useAnalyze() {
   const [state, setState] = useState<AnalyzeState>({ phase: "idle" });
 
-  const submit = useCallback(async (url: string, branch: string) => {
+  const submit = useCallback(async (
+    url: string,
+    branch: string,
+    top_n: number,
+    custom_stopwords: string[],
+    include_history: boolean,
+    max_commits: number,
+  ) => {
     setState({ phase: "submitting" });
     try {
-      const { job_id } = await analyzeRepo(url, branch);
+      const { job_id } = await analyzeRepo(url, branch, top_n, custom_stopwords, include_history, max_commits);
       setState({ phase: "polling", jobId: job_id });
       poll(job_id);
     } catch {

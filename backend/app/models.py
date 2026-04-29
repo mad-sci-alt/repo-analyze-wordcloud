@@ -5,6 +5,10 @@ from typing import Optional
 class AnalyzeRequest(BaseModel):
     repo_url: str = Field(..., description="GitHub repository URL")
     branch: str = Field(default="main", description="Branch to analyze")
+    top_n: int = Field(default=20, ge=5, le=200, description="Number of words to show in the word cloud")
+    custom_stopwords: list[str] = Field(default_factory=list, description="Additional stopwords to filter out")
+    include_history: bool = Field(default=False, description="Analyze commit history for language trends over time")
+    max_commits: int = Field(default=50, ge=10, le=500, description="Max number of commits to analyze when include_history is true")
 
 
 class AnalyzeResponse(BaseModel):
@@ -14,7 +18,7 @@ class AnalyzeResponse(BaseModel):
 
 
 class ProgressInfo(BaseModel):
-    stage: str  # "cloning" | "tokenizing" | "generating"
+    stage: str  # "cloning" | "tokenizing" | "generating" | "analyzing_history"
     message: str
 
 
@@ -31,6 +35,19 @@ class FrequencyStat(BaseModel):
     rank: int
 
 
+class DirectoryStat(BaseModel):
+    dir: str
+    token_count: int
+    file_count: int
+    top_words: list[FrequencyStat]
+
+
+class FileStat(BaseModel):
+    path: str
+    token_count: int
+    extension: str
+
+
 class Metadata(BaseModel):
     repo_url: str
     branch: str
@@ -44,3 +61,7 @@ class ResultResponse(BaseModel):
     word_cloud_image: str  # base64 data URL
     frequency_stats: list[FrequencyStat]
     metadata: Metadata
+    directory_stats: list[DirectoryStat] = Field(default_factory=list)
+    file_stats: list[FileStat] = Field(default_factory=list)
+    language_stats: dict[str, list[FrequencyStat]] = Field(default_factory=dict)
+    commit_history: list[dict] = Field(default_factory=list)

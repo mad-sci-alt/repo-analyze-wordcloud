@@ -6,6 +6,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      # 容器内 /mnt/host-code 映射到宿主机 /Users，容器内输入 /mnt/host-code/zsh/projects/myrepo
+      # 即可分析 Mac 本地代码目录（无需上传 zip）
+      - /Users:/mnt/host-code:ro
       - /tmp/github-wordcloud:/tmp/github-wordcloud
     environment:
       - PYTHONUNBUFFERED=1

@@ -1,5 +1,26 @@
 # 功能增强记录
 
+## F0: 本地分析（路径 / 文件上传）
+
+**功能描述：** 支持三种本地代码来源方式：输入绝对路径、拖拽上传 zip 包、或点击"Pick a Folder"自动打包上传（Chrome/Edge 浏览器）。
+
+**实现位置：**
+- `backend/app/models.py` — `AnalyzeByUploadRequest` 模型；`AnalyzeResponse` 新增 `upload_type` 字段
+- `backend/app/routers/analyze.py` — 新增 `POST /api/analyze/upload` 端点（form-data，接收 zip/tar.gz）；`run_analysis_upload()` 后台任务，解压后调用 `_collect_stats()` 统一分析
+- `frontend/src/api/client.ts` — 新增 `analyzeUpload()` 函数（FormData 上传）
+- `frontend/src/hooks/useAnalyze.ts` — `submit()` 新增 `file?: File` 参数，mode 为 `"upload"` 时调用 `analyzeUpload()`
+- `frontend/src/components/RepoInputForm.tsx` — 新增 "📦 Upload Zip" Tab，含：
+  - **文件夹选择器**：`window.showDirectoryPicker()` API（Chrome/Edge），选中后 JS 端用纯手写 zip 打包器（`buildZip()`，无第三方依赖）将整个目录打成 zip 上传
+  - **拖拽上传区**：支持 `.zip` / `.tar.gz` / `.tgz`，带视觉拖拽反馈
+
+**API 变更：**
+- `POST /api/analyze/upload` — multipart/form-data，`file`（必填）、`top_n`、`custom_stopwords`
+- `POST /api/analyze/local` — `local_path` 必填
+
+**注意：** 文件夹选择器仅 Chrome/Edge 支持，Safari/Firefox 用户只能使用拖拽上传 zip 的方式。
+
+---
+
 ## F1: Top-N 词数选择器
 
 **功能描述：** 用户可自定义词云和统计结果展示的词条数量，支持 10 / 20 / 25 / 50 / 100 五档。

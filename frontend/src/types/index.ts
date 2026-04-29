@@ -23,8 +23,9 @@ export interface FrequencyStat {
 }
 
 export interface Metadata {
-  repo_url: string;
-  branch: string;
+  source_type: "remote" | "local";
+  source: string;
+  branch: string | null;
   files_processed: number;
   total_tokens: number;
 }

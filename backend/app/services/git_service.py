@@ -42,8 +42,21 @@ def extract_code_files(repo_root: Path):
 def _walk_files(root: Path):
     """Recursively walk, skipping SKIP_DIRS."""
     for item in root.rglob("*"):
-        # Check if any part of the path is a skip dir
         parts = item.parts
         if any(d in SKIP_DIRS for d in parts):
             continue
         yield item
+
+
+def analyze_local_directory(local_path: str) -> tuple[Path, None]:
+    """
+    Validate a local directory path and return (absolute_path, None).
+    Returns None as the second element since local dirs have no Repo object.
+    Raises ValueError if the path is invalid or not a directory.
+    """
+    path = Path(local_path).resolve()
+    if not path.exists():
+        raise ValueError(f"Local path does not exist: {local_path}")
+    if not path.is_dir():
+        raise ValueError(f"Local path is not a directory: {local_path}")
+    return path, None

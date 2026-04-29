@@ -1,9 +1,11 @@
 import type { ProgressInfo } from "../types";
 
 const STAGE_ICONS: Record<string, string> = {
+  scanning: "📂",
   cloning: "⬇️",
   tokenizing: "🔍",
   generating: "🎨",
+  analyzing_history: "📊",
 };
 
 interface Props {

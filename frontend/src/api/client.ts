@@ -23,6 +23,36 @@ export const analyzeRepo = (
     }),
   }).then((r) => r.json() as Promise<AnalyzeResponse>);
 
+export const analyzeLocal = (
+  local_path: string,
+  top_n: number,
+  custom_stopwords: string[],
+) =>
+  fetch(`${BASE}/analyze/local`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      local_path,
+      top_n,
+      custom_stopwords,
+    }),
+  }).then((r) => r.json() as Promise<AnalyzeResponse>);
+
+export const analyzeUpload = (
+  file: File,
+  top_n: number,
+  custom_stopwords: string[],
+) => {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("top_n", String(top_n));
+  form.append("custom_stopwords", custom_stopwords.join(","));
+  return fetch(`${BASE}/analyze/upload`, {
+    method: "POST",
+    body: form,
+  }).then((r) => r.json() as Promise<AnalyzeResponse>);
+};
+
 export const pollStatus = (jobId: string) =>
   fetch(`${BASE}/status/${jobId}`).then((r) => r.json() as Promise<StatusResponse>);
 

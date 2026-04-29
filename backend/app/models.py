@@ -3,22 +3,29 @@ from typing import Optional
 
 
 class AnalyzeRequest(BaseModel):
-    repo_url: str = Field(..., description="GitHub repository URL")
-    branch: str = Field(default="main", description="Branch to analyze")
+    repo_url: str | None = Field(default=None, description="GitHub repository URL")
+    branch: str = Field(default="main", description="Branch to analyze (used when repo_url is provided)")
+    local_path: str | None = Field(default=None, description="Absolute local path to a code directory")
     top_n: int = Field(default=20, ge=5, le=200, description="Number of words to show in the word cloud")
     custom_stopwords: list[str] = Field(default_factory=list, description="Additional stopwords to filter out")
     include_history: bool = Field(default=False, description="Analyze commit history for language trends over time")
     max_commits: int = Field(default=50, ge=10, le=500, description="Max number of commits to analyze when include_history is true")
 
 
+class AnalyzeByUploadRequest(BaseModel):
+    top_n: int = Field(default=20, ge=5, le=200)
+    custom_stopwords: list[str] = Field(default_factory=list)
+
+
 class AnalyzeResponse(BaseModel):
     job_id: str
     status: str
     message: str = ""
+    upload_type: str = "url"  # "url" | "upload" — helps frontend distinguish the endpoint
 
 
 class ProgressInfo(BaseModel):
-    stage: str  # "cloning" | "tokenizing" | "generating" | "analyzing_history"
+    stage: str  # "scanning" | "tokenizing" | "generating" | "analyzing_history"
     message: str
 
 
@@ -49,8 +56,9 @@ class FileStat(BaseModel):
 
 
 class Metadata(BaseModel):
-    repo_url: str
-    branch: str
+    source_type: str  # "remote" | "local"
+    source: str  # repo URL or local path
+    branch: str | None = None
     files_processed: int
     total_tokens: int
 

@@ -67,13 +67,18 @@ function App() {
             <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
               <div className="flex flex-wrap gap-4 items-center">
                 <div>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">Repository</span>
-                  <p className="text-sm font-medium text-gray-900">{state.result.metadata.repo_url}</p>
+                  <span className="text-xs text-gray-500 uppercase tracking-wider">Source</span>
+                  <p className="text-sm font-medium text-gray-900 truncate max-w-xs" title={state.result.metadata.source}>
+                    {state.result.metadata.source_type === "local" ? "📁 " : "🌐 "}
+                    {state.result.metadata.source}
+                  </p>
                 </div>
-                <div className="border-l border-gray-200 pl-4">
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">Branch</span>
-                  <p className="text-sm font-medium text-gray-900">{state.result.metadata.branch}</p>
-                </div>
+                {state.result.metadata.branch && (
+                  <div className="border-l border-gray-200 pl-4">
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">Branch</span>
+                    <p className="text-sm font-medium text-gray-900">{state.result.metadata.branch}</p>
+                  </div>
+                )}
                 <div className="border-l border-gray-200 pl-4">
                   <span className="text-xs text-gray-500 uppercase tracking-wider">Files</span>
                   <p className="text-sm font-medium text-gray-900">{state.result.metadata.files_processed}</p>
